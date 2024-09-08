@@ -1,12 +1,69 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import Task from "./Task";
 
 const ToDoList = () => {
   const [newTask, setNewTask] = useState("");
 
   const [taskList, setTaskList] = useState([]);
-  console.log(taskList.length);
 
+const loadTasks = async () => {
+  const response = await fetch('https://playground.4geeks.com/todo/users/TiToCirkus');
+  if (response.ok) {
+        
+        const data = await response.json();
+        setTaskList(data.todos)
+        return data;
+    } else {
+        createUser()
+        console.log('error: ', response.status, response.statusText);
+        /* Handle the error returned by the HTTP request */
+        return {error: {status: response.status, statusText: response.statusText}};
+    };
+};
+
+const addNewTask = async() =>{
+    const response = await fetch('https://playground.4geeks.com/todo/todos/TiToCirkus', {
+        method: 'POST',
+        body: JSON.stringify({
+            label: newTask,
+            is_done: false
+          }), 
+        headers: {
+           'Content-Type': 'application/json'
+        }
+    });
+    if (response.ok) {
+        setNewTask("")
+        loadTasks()    
+    }
+
+};
+const deleteTask = async(id) =>{
+    const response = await fetch('https://playground.4geeks.com/todo/todos/'+ id, {
+        method: 'DELETE',
+  
+    });
+    if (response.ok) {
+      loadTasks()
+    }
+};
+
+const deleteUser = async ()=>{
+    const response = await fetch('https://playground.4geeks.com/todo/users/TiToCirkus', {
+        method: 'DELETE',
+  
+    });
+    setTaskList("");
+}
+
+const deleteList = async () =>{
+    for(let i = 0; i < taskList.length; i++){
+        deleteTask(taskList[i].id)
+    }
+}
+  useEffect(()=>{
+    loadTasks()
+  },[]);
   return (
     <div className="container ">
       <p className="my-4 colorLetras ">todos</p>
@@ -24,8 +81,7 @@ const ToDoList = () => {
           onChange={(event) => setNewTask(event.target.value)}
           onKeyUp={(event) => {
             if (event.key == "Enter") {
-              setTaskList([newTask, ...taskList]);
-              setNewTask("");
+              addNewTask()
             }
           }}
         />
@@ -34,11 +90,7 @@ const ToDoList = () => {
             task={tarea}
             key={indice}
             onRemove={() => {
-              setTaskList(
-                taskList.filter(
-                  (_tarea, indiceABorrar) => indice != indiceABorrar
-                )
-              );
+            deleteTask(tarea.id)
             }}
           />
         ))}
@@ -46,7 +98,23 @@ const ToDoList = () => {
           {taskList.length > 0 && <div>{taskList.length} items left</div>}
           {taskList.length == 0 && <div>No more task! Time for a drink!</div>}
         </p>
+       
       </div>
+      <button style={{
+            border: "none",
+          }} 
+          onClick={()=>{
+            deleteUser();
+           }}>Borrar Usuario
+           </button>
+
+           <button style={{
+            border: "none",
+          }} 
+          onClick={()=>{
+            deleteList();
+           }}>Borrar Lista
+           </button>
     </div>
   );
 };

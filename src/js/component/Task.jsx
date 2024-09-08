@@ -15,7 +15,7 @@ const Task = (props) => {
         setIsHovered(false);
       }}
     >
-      <p>{props.task}</p>
+      <p>{props.task.label}</p>
       {isHovered && (
         <button
           style={{ border: "none", background: "none" }}
