@@ -14,7 +14,6 @@ const loadTasks = async () => {
         setTaskList(data.todos)
         return data;
     } else {
-        createUser()
         console.log('error: ', response.status, response.statusText);
         /* Handle the error returned by the HTTP request */
         return {error: {status: response.status, statusText: response.statusText}};
